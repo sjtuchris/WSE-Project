@@ -8,7 +8,7 @@ import json
 class DataSummary:
 
     def __init__(self, input_file, output_file):
-        self.sc = SparkContext()
+       # self.sc = SparkContext()
         self.input_file = input_file
         self.output_file = output_file
 
@@ -63,16 +63,17 @@ class DataSummary:
         return input[6] == "successful"
 
     # main
-    def main(self):
-        kickstarter_data = self.sc.textFile("/user/cl3869/uncompress-data/Kickstarter_2017-01-15T22_21_04_985Z/Kickstarter.csv", use_unicode=False).mapPartitions(readfile)
-        by_state = kickstarter_data.map(self.by_state).reduceByKey(add).map(self.format_result)
-        by_state.saveAsTextFile(self.output_file+"/"+"by_state")
-        sc.stop()
-
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print "usage: inputfile outputfile"
         exit(-1)
 
+
     ds = DataSummary(sys.argv[1], sys.argv[2])
-    ds.main()
+    
+    sc = SparkContext()
+    kickstarter_data = sc.textFile("/user/cl3869/uncompress-data/Kickstarter_2017-01-15T22_21_04_985Z/Kickstarter.csv", use_unicode=False).mapPartitions(ds.readfile)
+    by_state = kickstarter_data.map(ds.by_state).reduceByKey(add).map(ds.format_result)
+    by_state.saveAsTextFile(ds.output_file+"/"+"by_state")
+    sc.stop()
+
