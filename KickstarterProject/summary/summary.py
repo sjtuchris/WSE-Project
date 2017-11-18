@@ -24,41 +24,43 @@ def format_result(res):
 # mappers
 # by country
 def by_country(input): # list with multiple column, country: 9
-    return input[9] # abbr or full name
+    return input[9], 1  # abbr or full name
 
 
 def by_city(input):
     location = input[26]
     location_json = json.load(location)
-    return location["displayable_name"]
+    return location["displayable_name"], 1
 
 
 # by state success or fail
 def by_state(input):
-    return input[6], 0
+    return input[6], 1
 
 
 # by success backers
 def by_backer(input):
-    return input[19]
+    return input[19], 1
 
 
 def by_category(input):
     # handle json
     input_json = json.load(input[27])
     subcategory = input_json["slug"]
-    return subcategory[subcategory.rfind('/')+1:]
+    return subcategory[subcategory.rfind('/')+1:], 1
 
 
 def by_subcategory(input):
     input_json = json.load(input[27])
-    return input_json["slug"]
+    return input_json["slug"], 1
 
 
 def by_pledged(input):
     return input[5]
 
 def by_start_date(input):
+    return ""
+
 
 #  filters
 def success_state(input):
