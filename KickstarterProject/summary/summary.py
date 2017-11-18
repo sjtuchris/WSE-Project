@@ -1,10 +1,11 @@
 import sys
-# import os
+import os
 from pyspark import SparkContext
 from operator import add
 import csv
 import json
 
+# dumbass shit environment
 
 # util
 def readfile(input):
@@ -74,8 +75,8 @@ if __name__ == "__main__":
 
     sc = SparkContext()
     # read from folder
-    kickstarter_data = sc.wholeTextFiles(sys.argv[1]).mapPartitions(readfile)
-    by_state = statekickstarter_data.map(by_state).reduceByKey(add).map(format_result)
+    kickstarter_data = sc.textFile("/user/cl3869/uncompress-data/Kickstarter_2017-01-15T22_21_04_985Z/Kickstarter.csv", use_unicode=False).mapPartitions(readfile)
+    by_state = kickstarter_data.map(by_state).reduceByKey(add).map(format_result)
     by_state.saveAsTextFile(sys.argv[2]+"/"+"by_state")
     sc.stop()
 
