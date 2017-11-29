@@ -1,0 +1,2 @@
+pip3 install scrapy-random-useragent
+pip3 install scrapy_proxies
