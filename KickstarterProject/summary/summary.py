@@ -4,7 +4,7 @@ from pyspark import SparkContext
 from operator import add
 import csv
 import json
-import datetime
+
 
 class DataSummary:
 
@@ -110,6 +110,8 @@ class DataSummary:
             return location_json["country"] == "US"
         except:
             return False
+
+
 # main
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -169,6 +171,5 @@ if __name__ == "__main__":
     # by updates
     by_update = kickstarter_data.map(ds.by_update).reduceByKey(add).map(ds.format_result)
     by_update.saveAsTextFile(ds.output_file + "/by_update")
-
 
     sc.stop()
