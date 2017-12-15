@@ -96,12 +96,31 @@ class DataSummary:
         except:
             return input[20], 0
 
+    def by_year(self, input):
+        try:
+            # convert create at to year
+            return "dummy", 1
+        except:
+            return "dummy", 1
+
+    def by_creator(self, input):
+        # creator is explained in terms of a url
+        creator_json = json.loads(input[5]) # loads() instead of load() !! stupid
+        return creator_json["urls"]["web"]["user"], 1
+
     #  filters
     def filter_success(self, input):
         return input[20] == "successful"
 
     def filter_failed(self, input):
         return input[20] == "failed"
+
+    def filter_success_us(self, input):
+        return input[11] == "successful"
+
+    def filter_failed_us(self, input):
+        return input[11] == "failed"
+
 
     def filter_us(self, input):
         try:
@@ -111,65 +130,83 @@ class DataSummary:
         except:
             return False
 
+    def filter_year(self, input):
+        try:
+            return True
+        except:
+            return False
 
 # main
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print "usage: inputfile outputfile"
+        print("usage: inputfile outputfile")
         exit(-1)
     csv.field_size_limit(sys.maxsize)
     ds = DataSummary(sys.argv[1], sys.argv[2])
 
     sc = SparkContext()
     kickstarter_data = sc.textFile(sys.argv[1], use_unicode=False).mapPartitions(ds.readfile)
-    # status of projects
-    by_state = kickstarter_data.map(ds.by_state).reduceByKey(add).map(ds.format_result)
-    by_state.saveAsTextFile(ds.output_file+"/"+"by_state")
-    # by backers
-    by_backers = kickstarter_data.map(ds.by_backer).reduceByKey(add).map(ds.format_result)
-    by_backers.saveAsTextFile(ds.output_file+"/by_backers")
-    # by pledged
-    by_pledged = kickstarter_data.map(ds.by_pledged).reduceByKey(add).map(ds.format_result)
-    by_pledged.saveAsTextFile(ds.output_file + "/by_pledged")
-    # by goal
-    by_goal = kickstarter_data.map(ds.by_goal).reduceByKey(add).map(ds.format_result)
-    by_goal.saveAsTextFile(ds.output_file + "/by_goal")
-    # by comment number
-    by_comment = kickstarter_data.map(ds.by_comment_num).reduceByKey(add).map(ds.format_result)
-    by_comment.saveAsTextFile(ds.output_file + "/by_comment_num")
-    # by category
-    by_category = kickstarter_data.map(ds.by_category).reduceByKey(add).map(ds.format_result)
-    by_category.saveAsTextFile(ds.output_file + "/by_category")
-    # by sub category
-    by_sub_category = kickstarter_data.map(ds.by_subcategory).reduceByKey(add).map(ds.format_result)
-    by_sub_category.saveAsTextFile(ds.output_file + "/by_sub_category")
-    # by successful category, in order to caculate successful rate on each category
-    by_success_category = kickstarter_data.filter(ds.filter_success).map(ds.by_category).reduceByKey(add).map(ds.format_result)
-    by_success_category.saveAsTextFile(ds.output_file + "/by_success_category")
-    # by failed category
-    by_fail_category = kickstarter_data.filter(ds.filter_failed).map(ds.by_category).reduceByKey(add).map(ds.format_result)
-    by_fail_category.saveAsTextFile(ds.output_file + "/by_fail_category")
-    # by successful sub category
-    by_success_subcategory = kickstarter_data.filter(ds.filter_success).map(ds.by_subcategory).reduceByKey(add).map(ds.format_result)
-    by_success_subcategory.saveAsTextFile(ds.output_file + "/by_success_subcategory")
-    # by failed sub category
-    by_fail_subcategory = kickstarter_data.filter(ds.filter_failed).map(ds.by_subcategory).reduceByKey(add).map(ds.format_result)
-    by_fail_subcategory.saveAsTextFile(ds.output_file + "/by_fail_subcategory")
-    # by_country
-    by_country = kickstarter_data.map(ds.by_country).reduceByKey(add).map(ds.format_result)
-    by_country.saveAsTextFile(ds.output_file + "/by_country")
-    # by city
-    by_city = kickstarter_data.map(ds.by_city).reduceByKey(add).map(ds.format_result)
-    by_city.saveAsTextFile(ds.output_file + "/by_city")
-    #by us states
-    by_us_states = kickstarter_data.filter(ds.filter_us).map(ds.by_us_states).reduceByKey(add).map(ds.format_result)
-    by_us_states.saveAsTextFile(ds.output_file + "/by_us_states")
-    #average duration for each success project
-    by_duration = kickstarter_data.filter(ds.filter_success).map(ds.by_duration).reduceByKey(add).map(ds.format_result)
-    by_duration.saveAsTextFile(ds.output_file + "/by_duration")
+    # # status of projects
+    # by_state = kickstarter_data.map(ds.by_state).reduceByKey(add).map(ds.format_result)
+    # by_state.saveAsTextFile(ds.output_file+"/"+"by_state")
+    # # by backers
+    # by_backers = kickstarter_data.map(ds.by_backer).reduceByKey(add).map(ds.format_result)
+    # by_backers.saveAsTextFile(ds.output_file+"/by_backers")
+    # # by pledged
+    # by_pledged = kickstarter_data.map(ds.by_pledged).reduceByKey(add).map(ds.format_result)
+    # by_pledged.saveAsTextFile(ds.output_file + "/by_pledged")
+    # # max_pledged = kickstarter_data.map(ds.get_pledged).max()
+    # # print(max)
+    # # by goal
+    # by_goal = kickstarter_data.map(ds.by_goal).reduceByKey(add).map(ds.format_result)
+    # by_goal.saveAsTextFile(ds.output_file + "/by_goal")
+    # # by comment number
+    # by_comment = kickstarter_data.map(ds.by_comment_num).reduceByKey(add).map(ds.format_result)
+    # by_comment.saveAsTextFile(ds.output_file + "/by_comment_num")
+    # # by category
+    # by_category = kickstarter_data.map(ds.by_category).reduceByKey(add).map(ds.format_result)
+    # by_category.saveAsTextFile(ds.output_file + "/by_category")
+    # # by sub category
+    # by_sub_category = kickstarter_data.map(ds.by_subcategory).reduceByKey(add).map(ds.format_result)
+    # by_sub_category.saveAsTextFile(ds.output_file + "/by_sub_category")
+    # # by successful category, in order to caculate successful rate on each category
+    # by_success_category = kickstarter_data.filter(ds.filter_success).map(ds.by_category).reduceByKey(add).map(ds.format_result)
+    # by_success_category.saveAsTextFile(ds.output_file + "/by_success_category")
+    # # by failed category
+    # by_fail_category = kickstarter_data.filter(ds.filter_failed).map(ds.by_category).reduceByKey(add).map(ds.format_result)
+    # by_fail_category.saveAsTextFile(ds.output_file + "/by_fail_category")
+    # # by successful sub category
+    # by_success_subcategory = kickstarter_data.filter(ds.filter_success).map(ds.by_subcategory).reduceByKey(add).map(ds.format_result)
+    # by_success_subcategory.saveAsTextFile(ds.output_file + "/by_success_subcategory")
+    # # by failed sub category
+    # by_fail_subcategory = kickstarter_data.filter(ds.filter_failed).map(ds.by_subcategory).reduceByKey(add).map(ds.format_result)
+    # by_fail_subcategory.saveAsTextFile(ds.output_file + "/by_fail_subcategory")
+    # # by_country
+    # by_country = kickstarter_data.map(ds.by_country).reduceByKey(add).map(ds.format_result)
+    # by_country.saveAsTextFile(ds.output_file + "/by_country")
+    # # by city
+    # by_city = kickstarter_data.map(ds.by_city).reduceByKey(add).map(ds.format_result)
+    # by_city.saveAsTextFile(ds.output_file + "/by_city")
+    # #by us states
+    # by_us_states = kickstarter_data.filter(ds.filter_us).map(ds.by_us_states).reduceByKey(add).map(ds.format_result)
+    # # by_us_states.saveAsTextFile(ds.output_file + "/by_us_states")
+    # #average duration for each success project
+    # # by_duration = kickstarter_data.filter(ds.filter_success).map(ds.by_duration).reduceByKey(add).map(ds.format_result)
+    # # by_duration.saveAsTextFile(ds.output_file + "/by_duration")
 
     # by updates
-    by_update = kickstarter_data.map(ds.by_update).reduceByKey(add).map(ds.format_result)
-    by_update.saveAsTextFile(ds.output_file + "/by_update")
+    # by_update = kickstarter_data.map(ds.by_update).reduceByKey(add).map(ds.format_result)
+    # by_update.saveAsTextFile(ds.output_file + "/by_update")
+
+    # by year
+    # by_year = kickstarter_data.map(ds.by_year).reduceByKey(add).map(ds.format_result)
+    # by_year.saveAsTextFile(ds.output_file + "/by_year")
+
+    # by creator others ok
+    by_success_creator = kickstarter_data.filter(ds.filter_success_us).map(ds.by_creator).reduceByKey(add).map(ds.format_result)
+    by_success_creator.saveAsTextFile(ds.output_file + "/by_success_creator")
+
+    by_fail_creator = kickstarter_data.filter(ds.filter_failed_us).map(ds.by_creator).reduceByKey(add).map(ds.format_result)
+    by_fail_creator.saveAsTextFile(ds.output_file + "/by_fail_creator")
 
     sc.stop()
