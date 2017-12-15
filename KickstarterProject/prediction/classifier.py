@@ -98,4 +98,3 @@ def predict():
 
 train_classifer()
 predict()
-

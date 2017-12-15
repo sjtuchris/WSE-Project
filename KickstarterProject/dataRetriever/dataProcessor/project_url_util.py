@@ -167,8 +167,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
-
-# # writeMongo(files);
-# # addSuccessDateMongo(files)
-# writeMongoUSProjects(files)

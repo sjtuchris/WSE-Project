@@ -10,7 +10,7 @@ from torch.autograd import Variable
 
 import matplotlib.pyplot as plt
 
-x = pd.read_csv('new.csv', dtype=float, usecols=['backers_count', 'comment_num', 'goal', 'period', 'update'])
+x = pd.read_csv('train.csv', dtype=float, usecols=['goal','period','subcategory_rate','state_rate','creator_rate'])
 # add feature
 # 1. blurb len
 # 2. success rate of category
@@ -19,7 +19,7 @@ x = pd.read_csv('new.csv', dtype=float, usecols=['backers_count', 'comment_num',
 # 5. period
 # 6. creator
 
-y = pd.read_csv('new.csv', dtype=float, usecols=['pledged'])
+y = pd.read_csv('train.csv', dtype=float, usecols=['pledged'])
 x = x.values
 
 x = np.ndarray.tolist(x)
@@ -63,7 +63,7 @@ class Net(torch.nn.Module):  # 继承 torch 的 Module
 net = Net(n_feature=5, n_hidden1=20, n_hidden2=20, n_output=1)
 
 # optimizer 是训练的工具
-optimizer = torch.optim.SGD(net.parameters(), lr=0.01)  # 传入 net 的所有参数, 学习率
+optimizer = torch.optim.SGD(net.parameters(), lr=0.05)  # 传入 net 的所有参数, 学习率
 loss_func = torch.nn.MSELoss()  # 预测值和真实值的误差计算公式 (均方差)
 
 for t in range(300):
@@ -78,7 +78,7 @@ for t in range(300):
     loss.backward()  # 误差反向传播, 计算参数更新值
     optimizer.step()  # 将参数更新值施加到 net 的 parameters 上
 
-# torch.save(net, "neuro_net_pledge.pkl")
+torch.save(net, "neuro_net_pledge.pkl")
 net2 = torch.load("neuro_net_pledge.pkl")
 prediction = net2(x)
 #
