@@ -2,17 +2,13 @@ import urllib2
 import re
 import sys
 
-# folder
+# Download data from Webrobots
 folder = sys.argv[1]
 headers = {'User-Agent': 'Mozilla/5.0'}
 req = urllib2.Request("http://webrobots.io/kickstarter-datasets", None, headers)
 html = urllib2.urlopen(req).read()
-#print html
-
 pattern = 'https://s3.amazonaws.com/weruns/forfun/Kickstarter/[a-zA-Z0-9.\-_/]+'
-
 links = re.findall(pattern, html)
-# print links
 
 # download 
 for link in links:
