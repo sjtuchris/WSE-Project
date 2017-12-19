@@ -5,7 +5,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn import preprocessing
 
 import torch
-import torch.nn.functional as F  # 激励函数都在这
+import torch.nn.functional as F  
 from torch.autograd import Variable
 
 import matplotlib.pyplot as plt
@@ -44,39 +44,37 @@ y = torch.from_numpy(np_y).float()
 x, y = torch.autograd.Variable(x), Variable(y)
 
 
-class Net(torch.nn.Module):  # 继承 torch 的 Module
+class Net(torch.nn.Module):  
     def __init__(self, n_feature, n_hidden1, n_hidden2, n_output):
-        super(Net, self).__init__()  # 继承 __init__ 功能
-        # 定义每层用什么样的形式
-        self.hidden1 = torch.nn.Linear(n_feature, n_hidden1)  # 隐藏层线性输出
+        super(Net, self).__init__()  
+        self.hidden1 = torch.nn.Linear(n_feature, n_hidden1)  # Output of hidden layer
         self.hidden2 = torch.nn.Linear(n_hidden1, n_hidden2)
-        self.predict = torch.nn.Linear(n_hidden2, n_output)  # 输出层线性输出
+        self.predict = torch.nn.Linear(n_hidden2, n_output)  # Output of prediction layer
 
-    def forward(self, x):  # 这同时也是 Module 中的 forward 功能
-        # 正向传播输入值, 神经网络分析出输出值
-        x = F.relu(self.hidden1(x))  # 激励函数(隐藏层的线性值)
+    def forward(self, x):  
+        x = F.relu(self.hidden1(x))  # Activation Function
         x = F.relu(self.hidden2(x))
-        x = self.predict(x)  # 输出值
+        x = self.predict(x)  # Prediction
         return x
 
 
 net = Net(n_feature=5, n_hidden1=20, n_hidden2=20, n_output=1)
 
-# optimizer 是训练的工具
-optimizer = torch.optim.SGD(net.parameters(), lr=0.05)  # 传入 net 的所有参数, 学习率
-loss_func = torch.nn.MSELoss()  # 预测值和真实值的误差计算公式 (均方差)
+# optimizer is the training tool
+optimizer = torch.optim.SGD(net.parameters(), lr=0.05)  # input training features and learning rate
+loss_func = torch.nn.MSELoss()  # Mean square error
 
 for t in range(300):
-    prediction = net(x)  # 喂给 net 训练数据 x, 输出预测值
+    prediction = net(x)  # feeding training data to the model
 
     # print(prediction.data)
 
-    loss = loss_func(prediction, y)  # 计算两者的误差
+    loss = loss_func(prediction, y)  # calculate error
     print(loss.data[0])
 
-    optimizer.zero_grad()  # 清空上一步的残余更新参数值
-    loss.backward()  # 误差反向传播, 计算参数更新值
-    optimizer.step()  # 将参数更新值施加到 net 的 parameters 上
+    optimizer.zero_grad()  
+    loss.backward()  # Back propagation
+    optimizer.step()  # Update parameters
 
 torch.save(net, "neuro_net_pledge.pkl")
 net2 = torch.load("neuro_net_pledge.pkl")
