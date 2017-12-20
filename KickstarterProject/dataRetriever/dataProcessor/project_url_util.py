@@ -4,7 +4,7 @@ import glob, os
 import time
 import datetime
 
-from csv import DictReader
+from csv import DictReader, writer
 from pymongo import MongoClient
 
 def getCsvFiles(cur_dir):
@@ -146,6 +146,37 @@ def writeMongoUSProjects(files):
 					}, upsert = True)
 				print(line_dict['name']+' inserted!')
 
+def findCreator():
+	file = "us_projects.csv"
+	the_reader = DictReader(open(file, 'r'))
+	creator_dict = {}
+	for line_dict in the_reader:
+
+		d = json.loads(line_dict['creator'])
+		name = d['urls']['web']['user']
+		success = line_dict['state']
+		if name in creator_dict:
+			pair = creator_dict[name]
+			total = pair[0]+1
+			success_sum = pair[1]
+			if success == 'successful':
+				success_sum = pair[1]+1
+			creator_dict[name] = (total,success_sum)
+
+		else:
+			if success == 'successful':
+				pair = (1,1)
+			else:
+				pair = (1,0)
+			creator_dict[name] = pair
+			# sortedDict = sorted(creator_dict, key=creator_dict.get, reverse=True)
+	with open('creators.csv', 'w') as f:
+		wtr = writer(f)
+		for i in creator_dict:
+			pair = creator_dict[i]
+			wtr.writerow((i[36:],pair[0],pair[1],(1+pair[1])/(1+pair[0])))
+			
+
 def default():
 	print("Invalid argument!")
 
@@ -155,7 +186,8 @@ def main():
 	myCommandDict = {"writemongo": writeMongo(files), 
 		"addsuccessrate": addSuccessDateMongo(files), 
 		"writemongousprojects": writeMongoUSProjects(files), 
-		"writeurls" writeUrl(files),
+		"writeurls": writeUrl(files),
+		"findCreator": findCreator(),
 		"default": default()}
 	commandline_args = sys.argv
 
